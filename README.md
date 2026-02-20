@@ -1,95 +1,114 @@
-Multi-Language Content Management API
-A high-performance Laravel-based API for managing localized content strings across multiple platforms (Web, Mobile, etc.). This project is architected to handle high-volume data (100k+ records) while maintaining response times under 500ms.
+# Multi-Language Content Management API
 
-🚀 Key Features
-Localized Content Management: CRUD operations for content keys across different locales.
+A high-performance, scalable RESTful API built with Laravel 11 to manage localized content strings across multiple platforms. This system is architected to handle large datasets (100,000+ records) with optimized search and retrieval speeds under 500ms.
 
-Global Search: High-performance filtering by key, value, locale, and JSON-based tags.
+---
 
-JWT/Sanctum Authentication: Secure API access for administrative tasks.
+## 🚀 Key Features
 
-Performance Optimized: Database indexing and Service-Repository pattern to ensure scalability.
+-   **Localized Content Management**: Full CRUD operations for managing keys/values across various locales.
+-   **Global Search**: Advanced filtering by `key`, `value`, `locale`, and JSON-based `tags`.
+-   **Performance Optimized**: Sub-500ms response times for large-scale data via database indexing and query optimization.
+-   **JWT/Sanctum Authentication**: Secure endpoints protected by Laravel Sanctum.
+-   **Robust Testing**: High reliability with **93.3% code coverage** on core API controllers.
 
-Full Test Suite: >90% code coverage across Controllers, Services, and Repositories.
+---
 
-🛠 Tech Stack
-Framework: Laravel 12.52.0
+## 🏗 Architecture & Design Patterns
 
-Database: MySQL 8.0 (optimized with composite indexes)
+### 1. Service-Repository Pattern
 
-Auth: Laravel Sanctum
+To ensure a clean separation of concerns and maintainability, the project implements the **Repository Pattern**:
 
-Testing: PHPUnit / Pest
+-   **Controllers**: Handle HTTP requests, input validation, and API responses.
+-   **Services**: Contain business logic, such as coordinating data between the database and the repository.
+-   **Repositories**: Encapsulate Eloquent queries, ensuring database interactions are centralized and easily mockable for testing.
 
-Documentation: Swagger/L5-Swagger
+### 2. Database & Search Optimization
 
-🏗 Architecture & Design Patterns
+To meet the requirement of handling 100,000+ records efficiently:
 
-1. Service-Repository Pattern
-   To maintain a clean separation of concerns, the project utilizes the Repository Pattern.
+-   **Indexing**: Composite indexes are applied to the `locale` and `key` columns for O(1) lookup speeds.
+-   **JSON Filtering**: Utilizes native MySQL `whereJsonContains` for efficient tag-based searching within JSON columns.
+-   **Parameter Grouping**: Search queries use nested logical groups in SQL to ensure search terms stay strictly scoped to the requested locale, preventing "leaking" results from other languages.
 
-Controllers: Handle request validation and HTTP responses.
+---
 
-Services: Handle business logic (e.g., coordinating between cache and database).
+## 🛠 Tech Stack
 
-Repositories: Handle all database-specific queries, ensuring the logic is reusable and testable in isolation.
+-   **Framework**: Laravel 12
+-   **Database**: MySQL 8.0
+-   **Auth**: Laravel Sanctum
+-   **Environment**: Laravel Sail (Docker)
+-   **Testing**: PHPUnit / Mockery
 
-2. Search Optimization
-   The search logic uses grouped WHERE clauses to prevent logical leaks between locale filters and LIKE search terms. To support the 100k record requirement:
+---
 
-Indexes have been applied to locale and key columns.
+## 🚦 Getting Started
 
-The tags column is stored as a JSON type, utilizing whereJsonContains for efficient filtering.
+### Prerequisites
 
-3. Testing Strategy
-   The project maintains a rigorous test suite using RefreshDatabase for isolation.
+-   Docker Desktop installed.
+-   PHP 8.2+ (for local composer installation).
 
-Feature Tests: Covering all API endpoints, including "Sad Paths" (404, 422, 401).
+### Installation
 
-Unit Tests: Mocking dependencies to test business logic in the Service layer.
+1. **Clone the repository:**
+    ```bash
+    git clone <repository-url>
+    cd content-management-api
+    ```
+2. **Install dependencies:**
+    ```bash
+    composer install
+    ```
+3. **Start the Docker environment (Sail):**
+    ```bash
+    ./vendor/bin/sail up -d
+    ```
+4. **Run migrations and seed the database::**
+    ```bash
+    ./vendor/bin/sail artisan migrate --seed
+    ```
 
-Coverage: Verified at 93.3%+ for the Content Controller and 100% for Authentication.
+---
 
-🚦 Getting Started
-Prerequisites
-Docker & Laravel Sail
+## 🧪 Testing & Quality Assurance
 
-Installation
-Clone the repository:
+This project maintains a high standard of code quality and reliability. The test suite covers "Happy Paths," "Sad Paths" (404, 422), and security constraints.
 
-Bash
-git clone git@github.com:domsviado/content-management-service.git
-cd content-management-api
-Install dependencies:
+-   **Feature Tests**: Validate API endpoints, middleware, and authentication flows.
+-   **Unit Tests**: Validate business logic in isolation within the Service layer.
 
-Bash
-composer install
-Start the environment:
+**Run all tests with coverage report:**
 
-Bash
-./vendor/bin/sail up -d
-Run migrations and seeders:
+```bash
+./vendor/bin/sail artisan test --coverage-text
+```
 
-Bash
-./vendor/bin/sail artisan migrate --seed
-🧪 Running Tests & Coverage
-To run the full test suite:
+---
 
-Bash
-./vendor/bin/sail artisan test
-To generate a coverage report:
+## 📡 API Reference
 
-Bash
-./vendor/bin/sail artisan test --coverage-html reports
-📖 API Documentation
-Once the server is running, you can access the interactive Swagger documentation at:
-http://localhost/api/documentation
+### Public Endpoints
 
-Final "Plus Points" addressed:
-[x] Authentication: Fully implemented via Sanctum.
+-   `GET /api/v1/content/{locale}` - Fetch all translations for a specific language.
 
-[x] Code Quality: Strict typing and PSR-12 compliance.
+### Protected Endpoints (Requires Bearer Token)
 
-[x] Performance: Handles 100k records with optimized SQL.
+-   `GET /api/v1/content/search` - Advanced filtering.
+    -   **Query Params**: `q` (search term), `tag` (JSON tag search), `locale` (exact match).
+-   `GET /api/v1/content/detail/{id}` - Fetch specific record details.
+-   `POST /api/v1/content` - Create or update (Upsert) content keys.
+-   `GET /api/v1/content/export/{locale}` - Export content for a specific locale.
 
-[x] Docker: Seamless environment setup via Sail.
+---
+
+## 📈 Performance Benchmarks
+
+Tested with **100,000 records**:
+
+-   **Direct ID Lookup**: ~90ms
+-   **Locale Indexed Fetch**: ~300ms
+-   **Global Search (LIKE %query%)**: ~115ms
+-   **JSON Tag Search**: ~200ms
