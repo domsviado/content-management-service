@@ -55,7 +55,7 @@ To meet the requirement of handling 100,000+ records efficiently:
 
 1. **Clone the repository:**
     ```bash
-    git clone <repository-url>
+    git clone git@github.com:domsviado/content-management-service.git
     cd content-management-api
     ```
 2. **Install dependencies:**
