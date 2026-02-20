@@ -100,7 +100,15 @@ This project maintains a high standard of code quality and reliability. The test
     -   **Query Params**: `q` (search term), `tag` (JSON tag search), `locale` (exact match).
 -   `GET /api/v1/content/detail/{id}` - Fetch specific record details.
 -   `POST /api/v1/content` - Create or update (Upsert) content keys.
--   `GET /api/v1/content/export/{locale}` - Export content for a specific locale.
+- `GET /api/v1/content/{locale}` - Fetch/Export optimized content map for a specific language.
+    - **Path Param**: `locale` (Required)
+    - **Query Params**:
+        - `tag`: Filter by specific JSON tags (e.g., `?tag=mobile`).
+        - `group`: Filter by key prefix (e.g., `?group=auth` matches `auth.login`, `auth.logout`).
+    - **Optimization**: 
+        - Uses **Cache Versioning** to provide instant retrieval while supporting selective cache busting.
+        - Leverages `DB::pluck` for minimal memory footprint (associative array output).
+        - Includes `Cache-Control` headers for CDN/Browser caching.
 
 ---
 
