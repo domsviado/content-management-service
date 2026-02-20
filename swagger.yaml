@@ -1,0 +1,133 @@
+openapi: 3.0.0
+info:
+  title: Translation Management API
+  version: 1.0.0
+  description: API for managing multi-locale translations with high-performance caching.
+
+servers:
+  - url: http://localhost/api/v1
+    description: Local development server (Sail)
+
+paths:
+  # --- AUTHENTICATION ---
+  /auth/signup:
+    post:
+      tags: [Authentication]
+      summary: Register a new user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name, email, password, password_confirmation]
+              properties:
+                name: { type: string }
+                email: { type: string, format: email }
+                password: { type: string, minLength: 8 }
+                password_confirmation: { type: string }
+      responses:
+        "201":
+          description: User created and token issued.
+
+  /auth/login:
+    post:
+      tags: [Authentication]
+      summary: Authenticate user and get token
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password]
+              properties:
+                email: { type: string, format: email }
+                password: { type: string }
+      responses:
+        "200":
+          description: Login successful.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token: { type: string }
+                  user: { type: object }
+
+  /auth/logout:
+    post:
+      tags: [Authentication]
+      summary: Revoke the current access token
+      security:
+        - sanctum: []
+      responses:
+        "200":
+          description: Logged out successfully.
+
+  # --- CONTENT DELIVERY ---
+  /content/{locale}:
+    get:
+      tags: [Content]
+      summary: JSON Export for Frontend (Public)
+      description: Returns a flat key-value pair of all translations for a locale. Highly cached.
+      parameters:
+        - name: locale
+          in: path
+          required: true
+          schema: { type: string, example: en }
+        - name: group
+          in: query
+          description: Filter by group (e.g. auth, dashboard)
+          schema: { type: string }
+      responses:
+        "200":
+          description: A flat JSON object.
+
+  # --- CONTENT MANAGEMENT ---
+  /content:
+    post:
+      tags: [Content Management]
+      summary: Create or Update (Upsert) translation
+      security:
+        - sanctum: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [locale, key, value]
+              properties:
+                locale: { type: string, example: "en" }
+                key: { type: string, example: "auth.login" }
+                value: { type: string, example: "Please sign in" }
+                tags: { type: array, items: { type: string } }
+      responses:
+        "201": { description: Created }
+        "200": { description: Updated }
+
+  /content/search:
+    get:
+      tags: [Content Management]
+      summary: Global search across translations
+      security:
+        - sanctum: []
+      parameters:
+        - name: q
+          in: query
+          description: Search term for keys or values
+          schema: { type: string, minLength: 1 }
+        - name: tag
+          in: query
+          schema: { type: string }
+      responses:
+        "200":
+          description: List of matching records.
+
+components:
+  securitySchemes:
+    sanctum:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
