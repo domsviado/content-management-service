@@ -56,7 +56,7 @@ To meet the requirement of handling 100,000+ records efficiently:
 1. **Clone the repository:**
     ```bash
     git clone git@github.com:domsviado/content-management-service.git
-    cd content-management-api
+    cd content-management-service
     ```
 2. **Install dependencies:**
     ```bash
@@ -93,15 +93,7 @@ This project maintains a high standard of code quality and reliability. The test
 ### Public Endpoints
 
 -   `GET /api/v1/content/{locale}` - Fetch all translations for a specific language.
-
-### Protected Endpoints (Requires Bearer Token)
-
--   `GET /api/v1/content/search` - Advanced filtering.
-    -   **Query Params**: `q` (search term), `tag` (JSON tag search), `locale` (exact match).
--   `GET /api/v1/content/detail/{id}` - Fetch specific record details.
--   `POST /api/v1/content` - Create or update (Upsert) content keys.
-- `GET /api/v1/content/{locale}` - Fetch/Export optimized content map for a specific language.
-    - **Path Param**: `locale` (Required)
+ - **Path Param**: `locale` (Required)
     - **Query Params**:
         - `tag`: Filter by specific JSON tags (e.g., `?tag=mobile`).
         - `group`: Filter by key prefix (e.g., `?group=auth` matches `auth.login`, `auth.logout`).
@@ -109,6 +101,13 @@ This project maintains a high standard of code quality and reliability. The test
         - Uses **Cache Versioning** to provide instant retrieval while supporting selective cache busting.
         - Leverages `DB::pluck` for minimal memory footprint (associative array output).
         - Includes `Cache-Control` headers for CDN/Browser caching.
+
+### Protected Endpoints (Requires Bearer Token)
+
+-   `GET /api/v1/content/search` - Advanced filtering.
+    -   **Query Params**: `q` (search term), `tag` (JSON tag search), `locale` (exact match).
+-   `GET /api/v1/content/detail/{id}` - Fetch specific record details.
+-   `POST /api/v1/content` - Create or update (Upsert) content keys.
 
 ---
 
